@@ -1,0 +1,46 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: route-planner-deployment
+  labels:
+    app: route-planner
+spec:
+  replicas: 1
+  strategy:
+    type: RollingUpdate
+  template:
+    metadata:
+      labels:
+        app: route-planner
+    spec:
+      hostNetwork: true
+      containers:
+        - name: fast-api
+          image: {{app_image}}
+          ports:
+            - name: backend
+              containerPort: 9009
+              protocol: TCP
+          env:
+            - name: MONGO_DB_URL
+              value: 'mongodb://0.0.0.0:27017/'
+            - name: GOOGLE_MAPS_API_KEY
+              value: {{google_maps_api_key}}
+        - name: mongodb
+          image: 'mongo:latest'
+          ports:
+            - name: mongo
+              containerPort: 27017
+              protocol: TCP
+      affinity:
+        podAntiAffinity:
+          preferredDuringSchedulingIgnoredDuringExecution:
+            - weight: 100
+              podAffinityTerm:
+                labelSelector:
+                  matchExpressions:
+                    - key: app
+                      operator: In
+                      values:
+                        - route_planner
+                topologyKey: kubernetes.io/hostname

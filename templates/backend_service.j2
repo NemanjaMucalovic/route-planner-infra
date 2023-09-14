@@ -1,0 +1,15 @@
+[Unit]
+Description=fast-api
+After=multi-user.target
+
+[Service]
+User=ubuntu
+Type=idle
+Environment="GOOGLE_MAPS_API_KEY={{google_maps_api_key}}"
+Environment="MONGO_DB_URL=mongodb://localhost:27017/"
+WorkingDirectory=/home/{{app_user}}/maps_dev
+ExecStart=/home/{{app_user}}/{{project_path}}/venv/bin/python main.py
+Restart=on-failure
+
+[Install]
+WantedBy=multi-user.target
